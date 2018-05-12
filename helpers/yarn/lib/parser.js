@@ -14,23 +14,12 @@ const { Install } = require("@dependabot/yarn-lib/lib/cli/commands/install");
 const Config = require("@dependabot/yarn-lib/lib/config").default;
 const { NoopReporter } = require("@dependabot/yarn-lib/lib/reporters");
 const Lockfile = require("@dependabot/yarn-lib/lib/lockfile").default;
-const PackageRequest = require("@dependabot/yarn-lib/lib/package-request")
-  .default;
-const {
-  normalizePattern
-} = require("@dependabot/yarn-lib/lib/util/normalize-pattern");
-const { getExoticResolver } = require("@dependabot/yarn-lib/lib/resolvers");
 const semver = require("semver");
 
 class DependabotReporter extends NoopReporter {
   lang(key, ...args) {
     return key;
   }
-}
-
-function isNotExotic(request) {
-  const { range } = normalizePattern(request.pattern);
-  return !getExoticResolver(range);
 }
 
 function isNotResolution(request) {
@@ -56,7 +45,6 @@ async function parse(directory) {
   const install = new Install(flags, config, reporter, lockfile);
   const { requests, patterns } = await install.fetchRequestFromCwd();
   const deps = requests
-    .filter(isNotExotic)
     .filter(isNotResolution)
     .map(request => ({
       request: request,
